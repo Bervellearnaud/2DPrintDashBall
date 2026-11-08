@@ -9,7 +9,48 @@ Tu tiens un marqueur, tu tiens un court, tu tiens une vague. Chaque bille manqu�
 **En ligne :** <https://painballvoom.netlify.app>  
 **Dépôt :** <https://github.com/loba225samuel-coder/painballv2>
 
+## Aperçu du jeu
+
+![PAINTBALL 2D sur PC : arène vue de dessus, bunkers et projections de peinture](visuals/splat-arena-pc-1920x1080.png)
+
+*Visuel PC — 1920 × 1080, composé à partir d’une capture réelle du jeu, sans redessiner le gameplay.*
+
+### Captures réelles
+
+**Accueil et choix du marqueur**
+
+![Écran d’accueil avec sélection des marqueurs, commandes et records locaux](visuals/references/menu.png)
+
+**Partie en cours**
+
+![Gameplay réel : joueur cyan, adversaires magenta, bunkers et terrain peint](visuals/references/gameplay.png)
+
+### Format mobile
+
+<p align="center">
+  <img src="visuals/splat-arena-mobile-1080x1920.png" alt="Visuel promotionnel vertical réunissant l’accueil et une partie de PAINTBALL 2D" width="360" />
+</p>
+
+*Visuel vertical — 1080 × 1920, adapté à la présentation sur téléphone. Il utilise des captures PC : ce n’est pas une capture du jeu exécuté sur mobile.*
+
+### Télécharger et reproduire les visuels
+
+- [Visuel PC — 1920 × 1080](visuals/splat-arena-pc-1920x1080.png)
+- [Visuel mobile — 1080 × 1920](visuals/splat-arena-mobile-1080x1920.png)
+- Captures sources : [accueil](visuals/references/menu.png) et [gameplay](visuals/references/gameplay.png).
+
+Les deux mises en page peuvent être régénérées depuis la racine du dépôt avec Python et [Pillow](https://pypi.org/project/Pillow/) :
+
+```bash
+python -m pip install Pillow
+python scripts/export-visuals.py
+```
+
+Le script utilise les polices DejaVu installées sous `/usr/share/fonts/truetype/dejavu/` ; adapter le chemin `FONT` si nécessaire sur un autre système.
+
 ### Sommaire
+
+[Voir les visuels](#aperçu-du-jeu)
 
 | | |
 | --- | --- |
