@@ -33,6 +33,71 @@ Tu tiens un marqueur, tu tiens un court, tu tiens une vague. Chaque bille manqu�
 
 *Visuel vertical — 1080 × 1920, adapté à la présentation sur téléphone. Il utilise des captures PC : ce n’est pas une capture du jeu exécuté sur mobile.*
 
+## Bestiaire — qui vas-tu affronter ?
+
+**Trois archétypes d’ennemis et quatre variantes de boss rythment la survie solo.**
+
+Les vignettes ci-dessous sont exportées avec les **fonctions de dessin du jeu**, sans illustration générée. Elles montrent les silhouettes agrandies et figées, sans halo animé. Les armes sont présentées seules, sans le corps du joueur, pour distinguer leurs canons et réservoirs. Les couleurs permettent de repérer rapidement les menaces sur le terrain.
+
+| Apparence | Ennemi | Repère visuel | Comportement | Conseil de survie |
+| --- | --- | --- | --- | --- |
+| <img src="visuals/codex/grunt.png" alt="Apparence en jeu : GRUNT" width="120" /> | **GRUNT — tireur classique** | 🟣 Magenta (`#ff2f87`) | Cherche la ligne de vue et tire à distance. Présent dès la vague 1. | Utilise les bunkers pour couper ses tirs. |
+| <img src="visuals/codex/rusher.png" alt="Apparence en jeu : RUSHER" width="120" /> | **RUSHER — assaillant de contact** | 🟠 Orange (`#ff8a1e`) | Fonce sur le joueur et inflige des dégâts au contact. Peut apparaître dès la vague 2. | Garde tes distances et conserve un dash pour esquiver. |
+| <img src="visuals/codex/sniper.png" alt="Apparence en jeu : SNIPER" width="120" /> | **SNIPER — tireur à charge** | 🟪 Violet (`#a86bff`) | Reste à distance, charge son tir puis envoie une bille rapide. Peut apparaître dès la vague 3. | Brise sa ligne de vue pendant la charge. |
+
+### Les boss — un rendez-vous toutes les 5 vagues
+
+> **GOLIATH → INFERNO → GLACIER → TOXIC**, puis le cycle recommence à la vague 25.
+
+| Apparence | Boss | Première rencontre | Identité visuelle | Multiplicateur de PV de variante |
+| --- | --- | --- | --- | --- |
+| <img src="visuals/codex/goliath.png" alt="Apparence en jeu : GOLIATH" width="120" /> | **GOLIATH** | **Vague 5** | 🟡 Or · double canon épais | ×1,00 |
+| <img src="visuals/codex/inferno.png" alt="Apparence en jeu : INFERNO" width="120" /> | **INFERNO** | **Vague 10** | 🟠 Orange · pointes de flamme pulsantes | ×1,10 |
+| <img src="visuals/codex/glacier.png" alt="Apparence en jeu : GLACIER" width="120" /> | **GLACIER** | **Vague 15** | 🔵 Cyan · cristaux orbitaux et noyau hexagonal | ×1,20 |
+| <img src="visuals/codex/toxic.png" alt="Apparence en jeu : TOXIC" width="120" /> | **TOXIC** | **Vague 20** | 🟢 Lime · couronne de spores et cuve dorsale | ×1,30 |
+
+Les quatre variantes alternent **tirs simples et salves en éventail**. Leur silhouette, leur halo et la couleur des projectiles changent ; leurs noms ne désignent pas des effets élémentaires distincts. Les multiplicateurs ci-dessus s’ajoutent à la progression des vagues : ce ne sont pas des valeurs de PV fixes.
+
+## Arsenal — choisis ton style de jeu
+
+### 5 marqueurs sélectionnables
+
+**Trois disponibles dès le départ, deux à débloquer.** Le choix s’effectue sur l’accueil et se conserve entre les parties.
+
+| Apparence | Marqueur | Style | Chargeur | Dégâts par tir | Disponibilité |
+| --- | --- | --- | --- | --- | --- |
+| <img src="visuals/codex/weapon-marker.png" alt="Apparence en jeu : MARKER" width="120" /> | **MARKER** | Polyvalent, précis et équilibré | 12 billes | 30 | Dès le départ |
+| <img src="visuals/codex/weapon-sprayer.png" alt="Apparence en jeu : SPRAYER" width="120" /> | **SPRAYER** | Tir rapide, couverture de peinture | 30 billes | 14 | Dès le départ |
+| <img src="visuals/codex/weapon-cannon.png" alt="Apparence en jeu : CANNON" width="120" /> | **CANNON** | Tir lent et lourd, perce une cible | 5 billes | 100 | Dès le départ |
+| <img src="visuals/codex/weapon-sniper.png" alt="Apparence en jeu : SNIPER" width="120" /> | **SNIPER** | Très longue portée, perce une cible | 3 billes | 120 | Atteindre la **vague 10** |
+| <img src="visuals/codex/weapon-shotgun.png" alt="Apparence en jeu : SHOTGUN" width="120" /> | **SHOTGUN** | Six billes en cône, très courte portée | 6 tirs | 18 × 6 | Cumuler **100 000 points** |
+
+*Le marqueur SNIPER est une arme du joueur ; l’ennemi SNIPER est un archétype adverse.*
+
+### 4 armes à ramasser en partie
+
+> **Capsules temporaires : 18 secondes de puissance**, puis retour automatique au marqueur sélectionné. Ces armes ne sont pas sélectionnables à l’accueil et ne se débloquent pas définitivement.
+
+| Apparence | Arme | Point fort | Chargeur | Dégâts par tir |
+| --- | --- | --- | --- | --- |
+| <img src="visuals/codex/weapon-flamer.png" alt="Apparence en jeu : FLAMER" width="120" /> | **FLAMER** | Peinture massive (×2,4), très courte portée | 60 billes | 7 |
+| <img src="visuals/codex/weapon-magnum.png" alt="Apparence en jeu : MAGNUM" width="120" /> | **MAGNUM** | Tir précis et puissant, perce deux cibles | 6 billes | 130 |
+| <img src="visuals/codex/weapon-minigun.png" alt="Apparence en jeu : MINIGUN" width="120" /> | **MINIGUN** | Très haute cadence, forte dispersion | 80 billes | 11 |
+| <img src="visuals/codex/weapon-launcher.png" alt="Apparence en jeu : LAUNCHER" width="120" /> | **LANCEUR** | Obus explosifs et dégâts de zone | 6 obus | 70 (impact direct) |
+
+Les dégâts indiqués sont les valeurs de base du code, hors effets supplémentaires. Pour les cadences, l’équilibrage et le fonctionnement des capsules, voir [les marqueurs](#22-les-marqueurs-léquilibrage-et-les-déblocages) et [les armes ramassables](#23-armes-ramassables-et-apparence).
+
+
+### Reproduire les vignettes du bestiaire et de l’arsenal
+
+```bash
+npm ci
+npm install --no-save --package-lock=false @napi-rs/canvas
+npx tsx scripts/export-codex.ts
+```
+
+Le script réutilise `drawEnemy` et `drawWeaponShape` du moteur, ainsi que les variantes et armes définies dans `src/game/rules.ts`. Les 16 vignettes sont enregistrées dans `visuals/codex/`.
+
 ### Télécharger et reproduire les visuels
 
 - [Visuel PC — 1920 × 1080](visuals/splat-arena-pc-1920x1080.png)
@@ -50,7 +115,7 @@ Le script utilise les polices DejaVu installées sous `/usr/share/fonts/truetype
 
 ### Sommaire
 
-[Voir les visuels](#aperçu-du-jeu)
+[Visuels](#aperçu-du-jeu) · [Ennemis](#bestiaire--qui-vas-tu-affronter-) · [Boss](#les-boss--un-rendez-vous-toutes-les-5-vagues) · [Marqueurs et armes](#arsenal--choisis-ton-style-de-jeu)
 
 | | |
 | --- | --- |
