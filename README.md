@@ -15,6 +15,26 @@ Tu tiens un marqueur, tu tiens un court, tu tiens une vague. Chaque bille manqu�
 
 *Visuel PC — 1920 × 1080, composé à partir d’une capture réelle du jeu, sans redessiner le gameplay.*
 
+### Nouveaux mockups — PC et mobile
+
+Ces mises en scène promotionnelles sont **générées à partir des captures du projet** : elles ne sont pas des captures brutes et certains détails peuvent différer du jeu. Les captures originales restent disponibles ci-dessous.
+
+#### Présentation PC
+
+![Mockup de PAINTBALL 2D sur un écran de bureau, avec clavier et souris](visuals/mockups/paintball-pc.png)
+
+[Télécharger le mockup PC](visuals/mockups/paintball-pc.png)
+
+#### Présentation mobile
+
+<p align="center">
+  <img src="visuals/mockups/paintball-mobile.png" alt="Mockup de PAINTBALL 2D sur un smartphone en orientation paysage, réalisé à partir d’une capture PC" width="480" />
+</p>
+
+[Télécharger le mockup mobile](visuals/mockups/paintball-mobile.png)
+
+> **À noter :** le téléphone est présenté en paysage avec une capture PC. Ce mockup ne montre pas une session native sur mobile ni les commandes tactiles réelles.
+
 ### Captures réelles
 
 **Accueil et choix du marqueur**
