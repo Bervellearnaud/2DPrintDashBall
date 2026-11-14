@@ -1,3 +1,4 @@
+import { drawBossVisual } from "./bossVisuals";
 import { Sfx } from "./audio";
 import {
   DEFAULT_WEAPON,
@@ -3557,7 +3558,6 @@ export class PaintballGame {
       ctx.fill();
     } else if (e.type === "boss") {
       const bv = BOSS_VARIANTS[(e.variant ?? 0) % BOSS_VARIANTS.length];
-      const tint = hit ? "#ffffff" : bv.color;
       const t = this.time;
       // halo de variante
       const glow = this.glows.get(bv.color);
@@ -3567,91 +3567,7 @@ export class PaintballGame {
         ctx.drawImage(glow, -e.r * 2.4, -e.r * 2.4, e.r * 4.8, e.r * 4.8);
         ctx.restore();
       }
-      if (bv.shape === "inferno") {
-        // double canon + pointes de flamme
-        ctx.fillStyle = "#132019";
-        this.rr(ctx, 4, -15, 42, 11, 5);
-        ctx.fill();
-        this.rr(ctx, 4, 4, 42, 11, 5);
-        ctx.fill();
-        for (let i = 0; i < 6; i++) {
-          const a = (i / 6) * TAU;
-          ctx.save();
-          ctx.rotate(a);
-          ctx.fillStyle = tint;
-          ctx.beginPath();
-          ctx.moveTo(e.r + 2, -7);
-          ctx.lineTo(e.r + 14 + Math.sin(t * 8 + i) * 4, 0);
-          ctx.lineTo(e.r + 2, 7);
-          ctx.closePath();
-          ctx.fill();
-          ctx.restore();
-        }
-      } else if (bv.shape === "glacier") {
-        // cristaux autour d'un noyau hexagonal
-        for (let i = 0; i < 8; i++) {
-          const a = (i / 8) * TAU + t * 0.5;
-          ctx.save();
-          ctx.rotate(a);
-          ctx.fillStyle = tint;
-          ctx.globalAlpha = 0.85;
-          ctx.beginPath();
-          ctx.moveTo(e.r + 3, -5);
-          ctx.lineTo(e.r + 16, 0);
-          ctx.lineTo(e.r + 3, 5);
-          ctx.closePath();
-          ctx.fill();
-          ctx.restore();
-        }
-      } else if (bv.shape === "toxic") {
-        // couronne de pics + réservoir
-        ctx.fillStyle = "#132019";
-        this.rr(ctx, -e.r - 12, -10, 16, 20, 6);
-        ctx.fill();
-        for (let i = 0; i < 10; i++) {
-          const a = (i / 10) * TAU;
-          ctx.fillStyle = tint;
-          ctx.beginPath();
-          ctx.arc(Math.cos(a) * (e.r + 6), Math.sin(a) * (e.r + 6), 3.4, 0, TAU);
-          ctx.fill();
-        }
-      } else {
-        // goliath : deux canons épais
-        ctx.fillStyle = "#132019";
-        this.rr(ctx, 4, -13, 40, 12, 5);
-        ctx.fill();
-        this.rr(ctx, 4, 3, 40, 12, 5);
-        ctx.fill();
-      }
-      ctx.fillStyle = "#0b1210";
-      this.rr(ctx, -e.r - 2, -e.r, (e.r + 2) * 2, e.r * 2, bv.shape === "glacier" ? 18 : 12);
-      ctx.fill();
-      ctx.fillStyle = tint;
-      this.rr(ctx, -e.r + 2, -e.r + 3, (e.r - 2) * 2, (e.r - 3) * 2, bv.shape === "glacier" ? 16 : 10);
-      ctx.fill();
-      // visière / noyau
-      if (bv.shape === "glacier") {
-        ctx.fillStyle = "#ffffff";
-        ctx.beginPath();
-        ctx.arc(0, 0, 9, 0, TAU);
-        ctx.fill();
-        ctx.fillStyle = bv.color;
-        ctx.beginPath();
-        ctx.arc(0, 0, 5.5, 0, TAU);
-        ctx.fill();
-      } else {
-        ctx.fillStyle = "rgba(11,18,16,0.55)";
-        this.rr(ctx, -e.r + 6, -5, e.r * 2 - 12, 10, 5);
-        ctx.fill();
-        ctx.fillStyle = "#ffffff";
-        ctx.beginPath();
-        ctx.arc(e.r - 8, 0, 8, 0, TAU);
-        ctx.fill();
-        ctx.fillStyle = "#0b1210";
-        ctx.beginPath();
-        ctx.arc(e.r - 6, 0, 4.6, 0, TAU);
-        ctx.fill();
-      }
+      drawBossVisual(ctx, bv, e.r, t, hit);
     } else {
       const long = e.type === "sniper";
       ctx.fillStyle = "#132019";
