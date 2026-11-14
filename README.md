@@ -51,10 +51,12 @@ Les vignettes ci-dessous sont exportées avec les **fonctions de dessin du jeu**
 
 | Apparence | Boss | Première rencontre | Identité visuelle | Multiplicateur de PV de variante |
 | --- | --- | --- | --- | --- |
-| <img src="visuals/codex/goliath.png" alt="Apparence en jeu : GOLIATH" width="120" /> | **GOLIATH** | **Vague 5** | 🟡 Or · double canon épais | ×1,00 |
-| <img src="visuals/codex/inferno.png" alt="Apparence en jeu : INFERNO" width="120" /> | **INFERNO** | **Vague 10** | 🟠 Orange · pointes de flamme pulsantes | ×1,10 |
-| <img src="visuals/codex/glacier.png" alt="Apparence en jeu : GLACIER" width="120" /> | **GLACIER** | **Vague 15** | 🔵 Cyan · cristaux orbitaux et noyau hexagonal | ×1,20 |
-| <img src="visuals/codex/toxic.png" alt="Apparence en jeu : TOXIC" width="120" /> | **TOXIC** | **Vague 20** | 🟢 Lime · couronne de spores et cuve dorsale | ×1,30 |
+| <img src="visuals/codex/goliath.png" alt="Apparence en jeu : GOLIATH" width="120" /> | **GOLIATH** | **Vague 5** | 🟡 Or · blindage hexagonal, plaques latérales et double canon | ×1,00 |
+| <img src="visuals/codex/inferno.png" alt="Apparence en jeu : INFERNO" width="120" /> | **INFERNO** | **Vague 10** | 🟠 Orange · coque anguleuse, ailettes de flamme et évents | ×1,10 |
+| <img src="visuals/codex/glacier.png" alt="Apparence en jeu : GLACIER" width="120" /> | **GLACIER** | **Vague 15** | 🔵 Cyan · armure hexagonale, six cristaux et noyau central | ×1,20 |
+| <img src="visuals/codex/toxic.png" alt="Apparence en jeu : TOXIC" width="120" /> | **TOXIC** | **Vague 20** | 🟢 Lime · cuve ronde, réservoirs latéraux et buses | ×1,30 |
+
+**Nouvelles apparences intégrées au moteur Canvas.** Les quatre illustrations ci-dessus montrent le rendu réellement utilisé en jeu, et non les images de concept. Les animations et halos restent actifs en partie ; les collisions et les caractéristiques des boss ne changent pas.
 
 Les quatre variantes alternent **tirs simples et salves en éventail**. Leur silhouette, leur halo et la couleur des projectiles changent ; leurs noms ne désignent pas des effets élémentaires distincts. Les multiplicateurs ci-dessus s’ajoutent à la progression des vagues : ce ne sont pas des valeurs de PV fixes.
 
@@ -263,10 +265,10 @@ barillet du **Magnum**, trois barillets qui tournent sur le **Minigun**, tube et
 
 | Vague | Boss | Couleur | Silhouette | Particularité |
 | --- | --- | --- | --- | --- |
-| 5 | **GOLIATH** | or | double canon épais | référence |
-| 10 | **INFERNO** | orange | pointes de flamme qui pulsent | +10 % PV |
-| 15 | **GLACIER** | cyan | cristaux orbitaux, noyau hexagonal | +20 % PV |
-| 20 | **TOXIC** | lime | couronne de spores, cuve dorsale | +30 % PV |
+| 5 | **GOLIATH** | or | blindage hexagonal, double canon, réservoirs arrière | référence |
+| 10 | **INFERNO** | orange | coque anguleuse, ailettes pulsantes, évents | +10 % PV |
+| 15 | **GLACIER** | cyan | coque hexagonale, six cristaux séparés, noyau central | +20 % PV |
+| 20 | **TOXIC** | lime | cuve ronde, réservoirs latéraux, tuyaux et buses | +30 % PV |
 
 Chaque variante a son halo, ses projectiles colorés et sa bannière (`INFERNO · BOSS`). Le HUD affiche le nom du boss
 en cours avec une icône de tête de mort.
