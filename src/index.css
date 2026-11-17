@@ -319,3 +319,22 @@ input {
     margin-top: 0.5rem;
   }
 }
+
+/* Main menu: readable title at all widths, visible keyboard focus and thumb-sized controls. */
+.menu-home h1 {
+  font-size: clamp(2rem, 9vw, 4rem);
+}
+.menu-home button:focus-visible,
+[role="dialog"] button:focus-visible {
+  outline: 3px solid var(--color-cyan-hot);
+  outline-offset: 4px;
+}
+[role="dialog"] button {
+  min-height: 44px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .menu-home .anim-in,
+  [role="dialog"].anim-pop {
+    animation: none;
+  }
+}
