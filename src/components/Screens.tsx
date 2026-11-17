@@ -1,5 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
+  Settings,
+  ChevronRight,
+  ArrowLeft,
   Play,
   Pause,
   RotateCcw,
@@ -7,7 +10,6 @@ import {
   Trophy,
   Skull,
   Target,
-  Zap,
   Keyboard,
   Smartphone,
   VolumeX,
@@ -17,8 +19,6 @@ import {
   Vibrate,
   Maximize,
   RotateCw,
-  Shield,
-  Users,
   Cloud,
   CloudOff,
   Save,
@@ -165,7 +165,7 @@ function MuteBtn({ muted, onMute }: { muted: boolean; onMute: () => void }) {
   return (
     <button
       onClick={onMute}
-      aria-label={muted ? "Couper le son" : "Rendre le son"}
+      aria-label={muted ? "Activer le son" : "Couper le son"}
       className="panel pointer-events-auto flex h-11 w-11 items-center justify-center text-chalk/70 transition hover:border-cyan-hot hover:text-cyan-hot active:translate-y-0.5"
     >
       {muted ? <VolumeX className="h-5 w-5" /> : <Volume2 className="h-5 w-5" />}
@@ -190,6 +190,7 @@ function Toggle({
     <button
       onClick={onClick}
       aria-label={label}
+      aria-pressed={on}
       className={`panel pointer-events-auto flex h-11 items-center gap-2 px-3 transition active:translate-y-0.5 ${
         on ? "border-lime-hot/60" : "text-moss"
       }`}
@@ -398,6 +399,7 @@ function WeaponPicker({
               key={w.id}
               onClick={() => !locked && onChange(w.id)}
               disabled={locked}
+              aria-pressed={on}
               title={locked ? progress.label : w.tagline}
               className={
                 "relative border-2 p-2 text-left transition " +
@@ -533,254 +535,116 @@ function Tips({ rows }: { rows: { icon: typeof Target; t: string; d: string }[] 
   );
 }
 
-function MobileStart({
-  onStart,
-  onMultiplayer,
-  multiplayerEnabled = false,
-  musicOn,
-  musicName,
-  musicMood,
-  onToggleMusic,
-  onCycleMusic,
-  weapon,
-  onWeapon,
-  onWeaponPreview,
-  career,
-  onProgression,
-  cloudStatus,
-  saveMeta,
-  onResume,
-  onDeleteSave,
-  resumeBusy,
-  rows,
-  best,
-  muted,
-  onMute,
-  vibe,
-  onVibe,
-  fullscreen,
-  onFullscreen,
-  portrait,
-}: StartProps) {
-  const [seen, setSeen] = useState(() => localStorage.getItem("pb.rotate") === "1");
+type MenuSection = "play" | "arsenal" | "records" | "settings" | "controls";
+const MENU_SECTIONS = {
+  play: { title: "JOUER", description: "Une nouvelle vague t’attend.", icon: Play },
+  arsenal: { title: "ARSENAL", description: "Ton marqueur, ton style de jeu.", icon: Crosshair },
+  records: { title: "RECORDS", description: "Tes meilleures performances sur le court.", icon: Trophy },
+  settings: { title: "PARAMÈTRES", description: "Règle ton expérience avant d’entrer dans l’arène.", icon: Settings },
+  controls: { title: "COMMANDES", description: "Prends le contrôle du terrain.", icon: Keyboard },
+};
+
+function MainMenu(props: StartProps) {
+  const [section, setSection] = useState<MenuSection | null>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
+  const opener = useRef<HTMLElement | null>(null);
+  const [rotateDismissed, setRotateDismissed] = useState(() => localStorage.getItem("pb.rotate") === "1");
+  const selected = WEAPONS[props.weapon];
+  const open = (next: MenuSection) => {
+    opener.current = document.activeElement as HTMLElement;
+    setSection(next);
+  };
+  useEffect(() => {
+    if (!section) return;
+    panelRef.current?.querySelector<HTMLButtonElement>("button")?.focus();
+    return () => { opener.current?.focus(); };
+  }, [section]);
+
+  const navigation = (id: MenuSection) => {
+    const { title, description, icon: Icon } = MENU_SECTIONS[id];
+    return (
+      <button key={id} onClick={() => open(id)} aria-haspopup="dialog"
+        className="menu-option panel flex min-h-20 items-center gap-3 p-4 text-left transition hover:border-cyan-hot hover:bg-court-600">
+        <Icon className="h-5 w-5 shrink-0 text-cyan-hot" />
+        <span className="min-w-0 flex-1"><span className="block font-display text-sm text-chalk">{title}</span>
+          <span className="mt-1 block font-cond text-xs text-moss">{description}</span></span>
+        <ChevronRight className="h-4 w-4 shrink-0 text-moss" />
+      </button>
+    );
+  };
   return (
-    <div className="scroll-thin absolute inset-0 overflow-y-auto">
-      <div className="stripes h-2 w-full opacity-70" />
-      <div className="noise relative flex min-h-[calc(100%-8px)] flex-col gap-4 px-4 py-5">
-        <div className="pt-1">
-          <div className="mb-2 flex items-center gap-2">
-            <span className="slash bg-magenta-hot px-2 py-[3px] font-display text-[10px] text-court-900">ARCADE</span>
-            <span className="font-cond text-[10px] font-extrabold tracking-[0.26em] text-moss">
-              60 FPS · TOP-DOWN · SPLAT OR BE SPLATTED
-            </span>
-          </div>
-          <div className="relative">
-            <Splat className="anim-wobble absolute -left-4 -top-6 h-24 w-24 opacity-60" color="#3ee8ff" />
-            <Splat className="absolute -right-2 bottom-1 h-16 w-16 opacity-45" color="#b9ff33" />
-            <Logo small />
-          </div>
-          <p className="mt-3 max-w-md font-body text-[15px] leading-snug text-chalk/75">
-            Cinq adversaires, zéro pitié. Chaque bille manquée tache le terrain — et le terrain vaut des points.
-          </p>
-        </div>
-
-        {!seen && portrait && (
-          <button
-            onClick={() => {
-              localStorage.setItem("pb.rotate", "1");
-              setSeen(true);
-            }}
-            className="panel anim-pop flex w-full items-center gap-3 border-gold/60 px-3 py-2.5 text-left active:translate-y-0.5"
-          >
-            <RotateCw className="h-6 w-6 shrink-0 anim-spin-slow text-gold" />
-            <span>
-              <span className="block font-display text-[12px] text-gold">TOURNE TON TÉLÉPHONE</span>
-              <span className="block font-cond text-[11px] font-bold tracking-wide text-moss">
-                EN PAYSAGE TU VOIS BEAUCOUP PLUS DE TERRAIN · TAPE POUR NE PLUS VOIR ÇA
-              </span>
-            </span>
-          </button>
-        )}
-
-        {/* zone pouce : action principale en bas */}
-        <div className="mt-auto flex flex-col gap-3">
-          {saveMeta && onResume && <ContinueStrip meta={saveMeta} onResume={onResume} onDeleteSave={onDeleteSave} busy={resumeBusy} compact />}
-          <div className="flex flex-wrap items-center gap-2">
-            <MobileToggles vibe={vibe} onVibe={onVibe} fullscreen={fullscreen} onFullscreen={onFullscreen} />
-            <MuteBtn muted={muted} onMute={onMute} />
-            <div className="w-full">
-              <MusicPicker on={musicOn} name={musicName} mood={musicMood} onToggle={onToggleMusic} onCycle={onCycleMusic} compact />
+    <div className="scroll-thin absolute inset-0 overflow-y-auto bg-gradient-to-br from-court-900/95 via-court-900/80 to-court-900/40">
+      <div inert={section !== null}>
+        <div className="stripes h-2 opacity-70" />
+        <main className="menu-home mx-auto flex min-h-[calc(100dvh-8px)] max-w-6xl flex-col justify-center gap-8 px-5 py-8 sm:px-8 lg:grid lg:grid-cols-[1.1fr_0.9fr] lg:items-center lg:gap-12">
+          <header className="anim-in min-w-0">
+            <div className="mb-6 flex flex-wrap items-center gap-3">
+              <span className="slash bg-magenta-hot px-3 py-1 font-display text-[10px] text-court-900">ARCADE ARENA</span>
+              <span className="font-cond text-[10px] font-extrabold tracking-[0.22em] text-moss">SURVIE · PEINTURE · COMBOS</span>
             </div>
-            {onProgression && (
-              <button onClick={onProgression} className="panel pointer-events-auto flex h-11 items-center gap-2 px-3 active:translate-y-0.5">
-                {cloudStatus === "guest" || cloudStatus === "account" ? <Cloud className="h-4 w-4 text-lime-hot" /> : <CloudOff className="h-4 w-4 text-gold" />}
-                <span className="font-cond text-[11px] font-extrabold tracking-[0.16em] text-chalk">PROGRESSION</span>
-              </button>
-            )}
-            {best > 0 && (
-              <span className="ml-auto flex items-center gap-1.5 font-cond text-[11px] font-extrabold tracking-[0.2em] text-gold">
-                <Trophy className="h-4 w-4" /> {best.toLocaleString()}
-              </span>
-            )}
-          </div>
-          <button onClick={onStart} className="btn flex w-full items-center justify-center gap-3 bg-cyan-hot py-4 text-lg text-court-900">
-            <Play className="h-6 w-6 fill-current" />
-            SOLO
-          </button>
-          {onMultiplayer && (
-            <button
-              onClick={onMultiplayer}
-              disabled={!multiplayerEnabled}
-              title={multiplayerEnabled ? "Ouvrir le multijoueur" : "Le mode multijoueur arrive bientôt"}
-              className={
-                multiplayerEnabled
-                  ? "btn flex w-full items-center justify-center gap-3 bg-magenta-hot py-3.5 text-base text-court-900"
-                  : "btn flex w-full cursor-not-allowed items-center justify-center gap-3 border-line bg-court-600/70 py-3.5 text-base text-moss opacity-80"
-              }
-            >
-              <Users className="h-5 w-5" />
-              MULTIJOUEUR
-              {!multiplayerEnabled && (
-                <span className="slash bg-gold px-2 py-[2px] font-display text-[10px] text-court-900">BIENTÔT</span>
-              )}
+            <div className="relative isolate">
+              <Splat className="pointer-events-none absolute -left-4 -top-8 -z-10 h-32 w-32 opacity-45" color="#3ee8ff" />
+              <Logo small={props.isTouch} />
+            </div>
+            <p className="mt-6 max-w-sm font-body text-base leading-relaxed text-chalk/75">Vise juste. Peins le court. Survis aux vagues.<br />L’arène attend ta prochaine couleur.</p>
+            <div className="mt-6 flex flex-wrap gap-5 border-l-2 border-cyan-hot pl-4">
+              <div><span className="block font-cond text-[10px] font-bold tracking-widest text-moss">MARQUEUR ÉQUIPÉ</span>
+                <button onClick={() => open("arsenal")} className="mt-1 flex min-h-11 items-center gap-2 font-display text-sm text-cyan-hot" aria-label={`Changer de marqueur : ${selected.name}`}>
+                  <Crosshair className="h-4 w-4" />{selected.name}<ChevronRight className="h-4 w-4" />
+                </button></div>
+              {props.best > 0 && <div><span className="block font-cond text-[10px] font-bold tracking-widest text-moss">MEILLEUR SCORE</span><span className="mt-3 block font-display text-sm text-gold">{props.best.toLocaleString("fr-FR")}</span></div>}
+            </div>
+          </header>
+          <nav aria-label="Menu principal" className="anim-in flex min-w-0 flex-col gap-3">
+            <button onClick={() => open("play")} aria-haspopup="dialog" className="btn flex min-h-20 items-center gap-4 bg-cyan-hot px-5 py-4 text-left text-court-900">
+              <Play className="h-7 w-7 fill-current" /><span className="flex-1"><span className="block text-xl">JOUER</span><span className="mt-1 block font-cond text-xs font-bold tracking-widest">{props.saveMeta ? "NOUVELLE PARTIE OU REPRENDRE" : "SURVIE SOLO"}</span></span><ChevronRight className="h-5 w-5" />
             </button>
-          )}
-          <div className="grid grid-cols-2 gap-3">
-            <ThumbMap compact />
-            <div className="panel p-2.5">
-              <div className="mb-1.5 flex items-center gap-2">
-                <Target className="h-4 w-4 text-lime-hot" />
-                <h3 className="font-display text-[12px] tracking-wide text-chalk">À RETENIR</h3>
-              </div>
-              <Tips
-                rows={[
-                  { icon: Zap, t: "COMBO x6", d: "un splat tous les 3,4 s" },
-                  { icon: Crosshair, t: "PEINS TOUT", d: "couverture = bonus de fin de vague" },
-                  { icon: Sparkles, t: "4 ARÈNES", d: "le terrain change tous les 4 niveaux" },
-                  { icon: Shield, t: "PORTAILS", d: "franchis le portail pour continuer" },
-                ]}
-              />
+            <div className="grid gap-3 sm:grid-cols-2">
+              {navigation("arsenal")}
+              {props.onProgression && <button onClick={props.onProgression} className="menu-option panel flex min-h-20 items-center gap-3 p-4 text-left transition hover:border-cyan-hot hover:bg-court-600"><Cloud className="h-5 w-5 shrink-0 text-lime-hot" /><span><span className="block font-display text-sm text-chalk">PROGRESSION</span><span className="mt-1 block font-cond text-xs text-moss">Profil, statistiques et déblocages.</span></span></button>}
+              {navigation("records")}
+              {navigation("settings")}
             </div>
-          </div>
-          <WeaponPicker value={weapon} onChange={onWeapon} onPreview={onWeaponPreview} career={career} compact />
-          <Leaderboard rows={rows} />
-        </div>
+            {navigation("controls")}
+            {props.multiplayerEnabled && props.onMultiplayer && <Btn onClick={props.onMultiplayer} tone="magenta">MULTIJOUEUR</Btn>}
+            {!props.isTouch && <p className="mt-2 text-center font-cond text-[11px] font-bold tracking-widest text-moss">ESPACE / ENTRÉE : PARTIE RAPIDE · TAB : NAVIGUER</p>}
+            {props.isTouch && props.portrait && !rotateDismissed && <button className="panel flex min-h-11 items-center gap-2 p-3 text-left font-cond text-xs text-gold" onClick={() => { localStorage.setItem("pb.rotate", "1"); setRotateDismissed(true); }}><RotateCw className="h-5 w-5 shrink-0" />En paysage, tu vois plus de terrain. Toucher pour masquer.</button>}
+          </nav>
+        </main>
       </div>
-    </div>
-  );
-}
-
-function DesktopStart({ onStart, onMultiplayer, multiplayerEnabled = false, onProgression, cloudStatus, saveMeta, onResume, onDeleteSave, resumeBusy, rows, best, muted, onMute, musicOn, musicName, musicMood, onToggleMusic, onCycleMusic, weapon, onWeapon, onWeaponPreview, career }: StartProps) {
-  return (
-    <div className="scroll-thin absolute inset-0 overflow-y-auto">
-      <div className="stripes h-2 w-full opacity-70" />
-      <div className="noise relative min-h-[calc(100%-8px)] bg-gradient-to-br from-court-900/95 via-court-900/80 to-court-900/40">
-        <div className="pad-menu-t pad-menu-b mx-auto grid max-w-6xl items-center gap-6 p-4 sm:p-7 lg:grid-cols-[1.1fr_0.9fr]">
-          <div className="anim-in">
-            <div className="mb-3 flex items-center gap-2">
-              <span className="slash bg-magenta-hot px-2 py-[3px] font-display text-[10px] text-court-900">ARCADE ARENA</span>
-              <span className="font-cond text-[11px] font-extrabold tracking-[0.32em] text-moss">
-                60 FPS · TOP-DOWN · SPLAT OR BE SPLATTED
-              </span>
-            </div>
-            <div className="relative">
-              <Splat className="anim-wobble absolute -left-6 -top-8 h-32 w-32 opacity-70 sm:h-44 sm:w-44" color="#3ee8ff" />
-              <Splat className="absolute -right-3 bottom-0 h-20 w-20 opacity-50 sm:h-28 sm:w-28" color="#b9ff33" />
-              <Logo />
-            </div>
-            <p className="mt-4 max-w-md font-body text-[15px] leading-snug text-chalk/75">
-              Ton marqueur crache de la peinture néon. Chaque tir manqué tache le court, et le court rapporte :
-              enchaîne les splats pour le multiplicateur, dash dans les tirs, tiens le plus de vagues possible.
-            </p>
-
-            {saveMeta && onResume && (
-              <div className="mt-4 max-w-lg">
-                <ContinueStrip meta={saveMeta} onResume={onResume} onDeleteSave={onDeleteSave} busy={resumeBusy} />
-              </div>
-            )}
-
-            <div className="mt-5 flex flex-wrap items-center gap-3">
-              <Btn onClick={onStart} tone="cyan" className="text-base">
-                <span className="flex items-center gap-2">
-                  <Play className="h-4 w-4 fill-current" /> SOLO
-                </span>
-              </Btn>
-              {onMultiplayer && (
-                <button
-                  onClick={onMultiplayer}
-                  disabled={!multiplayerEnabled}
-                  title={multiplayerEnabled ? "Ouvrir le multijoueur" : "Le mode multijoueur arrive bientôt"}
-                  className={
-                    multiplayerEnabled
-                      ? "btn flex items-center gap-2 bg-magenta-hot px-5 py-3 text-base text-court-900"
-                      : "btn flex cursor-not-allowed items-center gap-2 border-line bg-court-600/70 px-5 py-3 text-base text-moss opacity-80"
-                  }
-                >
-                  <Users className="h-4 w-4" /> MULTIJOUEUR
-                  {!multiplayerEnabled && (
-                    <span className="slash bg-gold px-2 py-[2px] font-display text-[10px] text-court-900">BIENTÔT</span>
-                  )}
-                </button>
-              )}
-              <span className="flex items-center gap-2 font-cond text-[11px] font-extrabold tracking-[0.2em] text-moss">
-                <kbd className="panel px-2 py-1 text-cyan-hot">ESPACE</kbd> POUR LANCER
-              </span>
-              {best > 0 && (
-                <span className="flex items-center gap-1.5 font-cond text-[11px] font-extrabold tracking-[0.2em] text-gold">
-                  <Trophy className="h-3.5 w-3.5" /> RECORD {best.toLocaleString()}
-                </span>
-              )}
-              <MuteBtn muted={muted} onMute={onMute} />
-              {onProgression && (
-                <button onClick={onProgression} className="panel pointer-events-auto flex h-11 items-center gap-2 px-3 transition hover:border-cyan-hot active:translate-y-0.5">
-                  {cloudStatus === "guest" || cloudStatus === "account" ? <Cloud className="h-4 w-4 text-lime-hot" /> : <CloudOff className="h-4 w-4 text-gold" />}
-                  <span className="font-cond text-[11px] font-extrabold tracking-[0.18em] text-chalk">PROGRESSION</span>
-                </button>
-              )}
-            </div>
-
-            <div className="mt-4 max-w-lg">
-              <WeaponPicker value={weapon} onChange={onWeapon} onPreview={onWeaponPreview} career={career} />
-            </div>
-
-            <div className="mt-4 max-w-md">
-              <MusicPicker on={musicOn} name={musicName} mood={musicMood} onToggle={onToggleMusic} onCycle={onCycleMusic} />
-            </div>
-
-            <div className="mt-5 grid max-w-lg gap-2 sm:grid-cols-3">
-              <Tips
-                rows={[
-                  { icon: Target, t: "PEINS LE COURT", d: "la couverture verse un bonus à la fin de chaque vague." },
-                  { icon: DoorOpen, t: "PORTAILS", d: "une vague nettoyée ouvre un portail : entre dedans pour le niveau suivant." },
-                  { icon: Crosshair, t: "3 MARQUEURS", d: "Marker polyvalent, Sprayer qui peint large, Cannon pour les boss." },
-                ]}
-              />
-            </div>
+      {section && <div className="fixed inset-0 z-30 flex items-center justify-center bg-court-900/85 p-3 backdrop-blur-sm sm:p-6" onClick={e => { if (e.target === e.currentTarget) setSection(null); }}>
+        <div ref={panelRef} role="dialog" aria-modal="true" aria-labelledby="menu-section-title" aria-describedby="menu-section-description"
+          className="panel anim-pop flex max-h-[90dvh] w-full max-w-3xl flex-col bg-court-800"
+          onKeyDown={e => {
+            e.stopPropagation();
+            if (e.key === "Escape") { e.preventDefault(); setSection(null); }
+            if (e.key === "Tab") {
+              const items = panelRef.current?.querySelectorAll<HTMLElement>('button:not(:disabled), [href], input, [tabindex="0"]');
+              if (!items?.length) return;
+              const first = items[0], last = items[items.length - 1];
+              if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+              else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+            }
+          }}>
+          <div className="flex shrink-0 items-center gap-3 border-b-2 border-line p-4 sm:p-5">
+            <button onClick={() => setSection(null)} className="panel flex min-h-11 items-center gap-2 px-3 font-cond text-xs font-extrabold text-cyan-hot" aria-label="Retour au menu principal"><ArrowLeft className="h-4 w-4" />RETOUR</button>
+            <div className="min-w-0"><h2 id="menu-section-title" className="font-display text-base text-chalk">{MENU_SECTIONS[section].title}</h2><p id="menu-section-description" className="mt-1 font-cond text-xs text-moss">{MENU_SECTIONS[section].description}</p></div>
           </div>
-
-          <div className="anim-in flex flex-col gap-4" style={{ animationDelay: "0.08s" }}>
-            <div className="panel">
-              <div className="flex items-center gap-2 border-b-2 border-line bg-court-700/70 px-3 py-2">
-                <Keyboard className="h-4 w-4 text-lime-hot" />
-                <h3 className="font-display text-[13px] tracking-wide text-chalk">COMMANDES</h3>
-                <span className="ml-auto font-cond text-[10px] font-extrabold tracking-[0.2em] text-moss">CLAVIER + SOURIS</span>
-              </div>
-              <ul className="divide-y divide-line/60">
-                {KEYS.map(([k, v]) => (
-                  <li key={k} className="flex items-center justify-between gap-3 px-3 py-1.5">
-                    <span className="font-cond text-[11px] font-extrabold tracking-[0.16em] text-moss">{v.toUpperCase()}</span>
-                    <kbd className="panel px-2 py-0.5 font-cond text-[11px] font-extrabold tracking-wider text-cyan-hot">{k}</kbd>
-                  </li>
-                ))}
-              </ul>
-              <p className="border-t-2 border-line px-3 py-1.5 font-cond text-[10px] font-bold tracking-wider text-moss">
-                SUR MOBILE : GLISSE À GAUCHE POUR BOUGER, À DROITE POUR VISER ET TIRER.
-              </p>
-            </div>
-            <Leaderboard rows={rows} />
+          <div className="scroll-thin min-h-0 overflow-y-auto p-4 sm:p-5">
+            {section === "play" && <div className="flex flex-col gap-4">
+              {props.saveMeta && props.onResume && <ContinueStrip meta={props.saveMeta} onResume={props.onResume} onDeleteSave={props.onDeleteSave} busy={props.resumeBusy} />}
+              <div className="panel p-4"><p className="mb-4 font-cond text-sm text-moss">Marqueur équipé : <strong className="text-cyan-hot">{selected.name}</strong>. Une nouvelle partie démarre à la vague 1.</p><Btn onClick={props.onStart} className="w-full"><span className="flex items-center justify-center gap-2"><Play className="h-5 w-5" />NOUVELLE PARTIE SOLO</span></Btn></div>
+            </div>}
+            {section === "arsenal" && <WeaponPicker value={props.weapon} onChange={props.onWeapon} onPreview={props.onWeaponPreview} career={props.career} />}
+            {section === "records" && <Leaderboard rows={props.rows} />}
+            {section === "settings" && <div className="space-y-5">
+              <section><h3 className="mb-3 font-display text-sm text-chalk">AUDIO</h3><Toggle on={!props.muted} onClick={props.onMute} label={props.muted ? "SON DÉSACTIVÉ" : "SON ACTIVÉ"} icon={props.muted ? VolumeX : Volume2} /><div className="mt-3"><MusicPicker on={props.musicOn} name={props.musicName} mood={props.musicMood} onToggle={props.onToggleMusic} onCycle={props.onCycleMusic} /></div></section>
+              <section><h3 className="mb-3 font-display text-sm text-chalk">AFFICHAGE ET CONFORT</h3><MobileToggles vibe={props.vibe} onVibe={props.onVibe} fullscreen={props.fullscreen} onFullscreen={props.onFullscreen} /><p className="mt-3 font-cond text-xs text-moss">Les vibrations nécessitent un appareil compatible. Le plein écran dépend des autorisations du navigateur.</p></section>
+            </div>}
+            {section === "controls" && <div className="space-y-5"><div className="panel"><h3 className="border-b-2 border-line p-3 font-display text-sm text-chalk">CLAVIER ET SOURIS</h3><ul className="divide-y divide-line">{KEYS.map(([key, label]) => <li key={key} className="flex items-center justify-between gap-3 p-3 font-cond text-sm"><span className="text-moss">{label}</span><kbd className="text-right font-bold text-cyan-hot">{key}</kbd></li>)}</ul></div><ThumbMap /><Tips rows={[{ icon: Target, t: "PEINS LE COURT", d: "La couverture verse un bonus à la fin de chaque vague." }, { icon: DoorOpen, t: "FRANCHIS LE PORTAIL", d: "Une fois la vague nettoyée, entre dans le portail pour continuer." }]} /></div>}
           </div>
         </div>
-      </div>
+      </div>}
     </div>
   );
 }
@@ -817,7 +681,7 @@ interface StartProps {
 }
 
 export function StartScreen(props: StartProps) {
-  return props.isTouch ? <MobileStart {...props} /> : <DesktopStart {...props} />;
+  return <MainMenu {...props} />;
 }
 
 /* ---------------- pause ---------------- */

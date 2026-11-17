@@ -560,6 +560,9 @@ export default function App() {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+      // Native button activation must not also launch a quick game behind the menu.
+      if (e.defaultPrevented || ((e.code === "Space" || e.code === "Enter") &&
+        e.target instanceof Element && e.target.closest("button, a, [role=dialog]"))) return;
       if ((e.ctrlKey || e.metaKey) && e.code === "KeyS") {
         e.preventDefault();
         if (active === "solo" && (status === "playing" || status === "paused")) void saveCurrent();
