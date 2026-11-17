@@ -338,3 +338,12 @@ input {
     animation: none;
   }
 }
+
+/* Gameplay HUD: compact essentials, optional details, clear focus without covering the court. */
+.hud-action:focus-visible {
+  outline: 2px solid var(--color-cyan-hot);
+  outline-offset: 3px;
+}
+@media (max-width: 480px) {
+  .hud-essential { max-width: 210px; column-gap: 0.5rem; }
+}

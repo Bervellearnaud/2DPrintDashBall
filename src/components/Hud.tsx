@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from "react";
 import type { HudState } from "@/game/engine";
 import {
   Rocket,
@@ -14,7 +15,8 @@ import {
   PaintBucket,
   Vibrate,
   Maximize,
-  Smartphone,
+  MoreHorizontal,
+  X,
   Save,
   Check,
   DoorOpen,
@@ -67,251 +69,73 @@ const tap =
   "panel flex items-center justify-center transition active:translate-y-0.5 hover:border-cyan-hot/70";
 
 export default function Hud({
-  hud,
-  muted,
-  vibe,
-  isTouch,
-  portrait,
-  onPause,
-  onMute,
-  onVibe,
-  onFullscreen,
-  onSave,
-  saveBusy,
-  justSaved,
+  hud, muted, vibe, isTouch, portrait, onPause, onMute, onVibe,
+  onFullscreen, onSave, saveBusy, justSaved,
 }: Props) {
-  const hearts = Array.from({ length: hud.maxHp });
-  const cov = Math.round(hud.coverage * 100);
-  // Paysage court : peu de hauteur verticale → interface resserrée
-  const viewportHeight = typeof window !== "undefined" ? (window.visualViewport?.height ?? window.innerHeight) : 0;
-  const compactLandscape = isTouch && !portrait && viewportHeight < 560;
-
+  const [details, setDetails] = useState(false);
+  const detailsButton = useRef<HTMLButtonElement>(null);
+  useEffect(() => {
+    const key = (event: KeyboardEvent) => {
+      if (event.repeat || event.ctrlKey || event.metaKey || event.altKey ||
+        (event.target instanceof Element && event.target.closest('input, textarea, button, a, [contenteditable]'))) return;
+      if (event.code === 'KeyH') { event.preventDefault(); setDetails(value => !value); }
+    };
+    window.addEventListener('keydown', key);
+    return () => window.removeEventListener('keydown', key);
+  }, []);
+  const lowHealth = hud.hp <= 2;
+  const lowAmmo = hud.ammo <= Math.max(1, Math.floor(hud.mag * 0.25));
+  const powerPct = (pct: number) => `${Math.max(0, Math.min(1, pct)) * 100}%`;
   return (
     <div className="pointer-events-none absolute inset-0 select-none">
-      {/* ---------- barre haute ---------- */}
-      <div className={"pad-hud-t pad-hud-l pad-hud-r flex flex-wrap items-start justify-between " + (compactLandscape ? "gap-1" : "gap-x-2 gap-y-1.5 sm:gap-x-4")}>
-        <div className={"flex min-w-0 flex-col " + (compactLandscape ? "gap-1" : "gap-1.5")}>
-          <div className={"flex items-center " + (compactLandscape ? "gap-1" : "gap-1.5")}>
-            <div className={"panel flex items-center " + (compactLandscape ? "gap-1 px-1.5 py-1" : "gap-2 px-2.5 py-1.5")}>
-              <PaintBucket className={"shrink-0 text-cyan-hot " + (compactLandscape ? "h-3.5 w-3.5" : "h-4 w-4")} />
-              <div className="flex gap-1">
-                {hearts.map((_, i) => {
-                  const full = i < hud.hp;
-                  return (
-                    <span
-                      key={i}
-                      className={
-                        "skew-x-[-12deg] border transition-all duration-150 " +
-                        (compactLandscape ? "h-3.5 w-2 " : isTouch ? "h-4 w-2 " : "h-4 w-2.5 ") +
-                        (full
-                          ? "border-cyan-hot/60 bg-cyan-hot shadow-[0_0_10px_rgba(62,232,255,0.55)]"
-                          : "border-line bg-court-600/70")
-                      }
-                    />
-                  );
-                })}
-              </div>
+      <div className="pad-hud-t pad-hud-l pad-hud-r flex items-start justify-between gap-2">
+        {/* One quiet status capsule, not a full-width wall of panels. */}
+        <div className="flex min-w-0 flex-col items-start gap-1.5">
+          <div className="hud-essential flex max-w-full flex-wrap items-center gap-x-3 gap-y-1 rounded-lg border border-line/60 bg-court-900/75 px-2.5 py-2 text-chalk backdrop-blur-sm">
+            <div className="flex items-center gap-1.5" role="meter" aria-label="Vie" aria-valuenow={hud.hp} aria-valuemin={0} aria-valuemax={hud.maxHp}>
+              <PaintBucket className={'h-3.5 w-3.5 ' + (lowHealth ? 'text-magenta-hot' : 'text-cyan-hot')} />
+              <span className="flex gap-0.5" aria-hidden="true">{Array.from({ length: hud.maxHp }, (_, i) => <span key={i} className={'h-2.5 w-1.5 rounded-sm ' + (i < hud.hp ? lowHealth ? 'bg-magenta-hot' : 'bg-cyan-hot' : 'bg-line')} />)}</span>
+              <span className="sr-only">{hud.hp}/{hud.maxHp}</span>
             </div>
-            {isTouch && (
-              <div className={"panel flex items-center " + (compactLandscape ? "gap-1 px-1 py-1" : "gap-1 px-1.5 py-1")}>
-                <Users className="h-3.5 w-3.5 shrink-0 text-magenta-hot" />
-                <span className={"font-num font-extrabold leading-none text-chalk " + (compactLandscape ? "text-xs" : "text-sm")}>{hud.enemies}</span>
-              </div>
-            )}
+            <span className="font-cond text-xs font-extrabold text-lime-hot" aria-label={`Vague ${hud.wave || 1}`}>V{hud.wave || 1}</span>
+            <span className="flex items-center gap-1 font-num text-xs font-bold" title="Adversaires restants" aria-label={`${hud.enemies} adversaires restants`}><Users className="h-3.5 w-3.5 text-magenta-hot" />{hud.enemies}</span>
+            <span className={'flex items-center gap-1 font-num text-xs font-bold ' + (lowAmmo ? 'text-gold' : 'text-chalk')} title={`${hud.weaponName} : munitions`} aria-label={`${hud.weaponName}, ${hud.ammo} billes sur ${hud.mag}`}><Target className="h-3.5 w-3.5" />{hud.ammo}/{hud.mag}</span>
           </div>
-
-          <div className="flex flex-wrap items-center gap-1.5">
-            <div className={"slash bg-lime-hot " + (compactLandscape ? "px-2 py-0.5" : isTouch ? "px-2 py-[3px]" : "px-2.5 py-0.5")}>
-              <span className={"font-display leading-tight tracking-wide text-court-900 " + (compactLandscape ? "text-[11px]" : "text-[13px]")}>
-                VAGUE {hud.wave || 1}
-              </span>
-            </div>
-            {!isTouch && (
-              <div className="panel flex items-center gap-1.5 px-2.5 py-1.5">
-                <Users className="h-4 w-4 text-magenta-hot" />
-                <span className="font-cond text-sm font-extrabold tracking-wider text-chalk/80">
-                  RESTANTS <span className="font-num text-base text-chalk">{hud.enemies}</span>
-                </span>
-              </div>
-            )}
-            <div className="panel flex items-center gap-1.5 px-1.5 py-1">
-              <span className={"relative block overflow-hidden rounded-sm bg-court-600 " + (compactLandscape ? "h-1 w-10" : isTouch ? "h-1 w-12" : "h-1.5 w-14 sm:w-24")}>
-                <span
-                  className="absolute inset-y-0 left-0 bg-gradient-to-r from-cyan-hot to-lime-hot transition-[width] duration-200"
-                  style={{ width: `${Math.min(100, cov)}%` }}
-                />
-              </span>
-              <span className={"font-num font-extrabold leading-none text-chalk/80 " + (compactLandscape ? "text-[9px]" : "text-[11px]")}>{cov}%</span>
-            </div>
-            <div
-              className={"panel flex items-center gap-1 px-1.5 py-0.5 " + (hud.weaponDrop ? "border-gold/70 bg-gold/10" : "border-line")}
-              title={hud.weaponDrop ? "Arme ramassée — temporaire" : "Marqueur équipé"}
-            >
-              <Target className={"h-3 w-3 shrink-0 " + (hud.weaponDrop ? "text-gold" : "text-chalk/80")} />
-              <span className={"font-display text-[9px] tracking-wide " + (hud.weaponDrop ? "text-gold" : "text-chalk")}>{hud.weaponName}</span>
-              <span className="font-num text-[9px] font-extrabold text-chalk/70">
-                {hud.ammo}/{hud.mag}
-              </span>
-              {hud.weaponDrop && (
-                <span className="relative block h-1 w-8 overflow-hidden rounded-full bg-court-600">
-                  <span className="absolute inset-y-0 left-0 bg-gold" style={{ width: `${hud.weaponDropPct * 100}%` }} />
-                </span>
-              )}
-            </div>
-            {hud.bossName && (
-              <div className="panel flex items-center gap-1 border-magenta-hot/70 bg-magenta-hot/10 px-1.5 py-0.5">
-                <Skull className="h-3 w-3 shrink-0 text-magenta-hot" />
-                <span className="font-display text-[9px] tracking-wide text-magenta-hot">BOSS {hud.bossName}</span>
-              </div>
-            )}
-            <div className="panel flex items-center gap-1 border-cyan-hot/30 px-1.5 py-0.5" title="Terrain actuel">
-              <span className={"font-cond font-extrabold text-moss " + (isTouch ? "text-[8px] tracking-[0.12em]" : "text-[9px] tracking-[0.18em]")}>
-                ARÈNE {hud.arenaIndex + 1}/{hud.arenaCount} · {hud.arena}
-              </span>
-            </div>
-            {!isTouch && (
-              <div className="panel hidden items-center gap-1 px-2 py-1 sm:flex">
-                <Timer className="h-3.5 w-3.5 text-moss" />
-                <span className="font-num text-xs text-moss">
-                  {Math.floor(hud.time / 60)}:{String(Math.floor(hud.time % 60)).padStart(2, "0")}
-                </span>
-              </div>
-            )}
-            {hud.portal && (
-              <div className="panel anim-pop flex items-center gap-1 border-lime-hot bg-lime-hot/15 px-1.5 py-0.5">
-                <DoorOpen className="h-3.5 w-3.5 text-lime-hot" />
-                <span className={"font-display tracking-wide text-lime-hot " + (isTouch ? "text-[9px]" : "text-[10px]")}>
-                  {isTouch ? "PORTAIL" : "PORTAIL OUVERT — FRANCHIS-LE"}
-                </span>
-              </div>
-            )}
-            {hud.powers.slice(0, 6).map((pw) => {
-              const Icon = POWER_ICONS[pw.id] ?? Zap;
-              return (
-                <div
-                  key={pw.id}
-                  className={"panel anim-pop flex items-center " + (compactLandscape ? "gap-0.5 px-1 py-0.5" : "gap-1 px-2 py-0.5")}
-                  style={{ borderColor: pw.color + "99" }}
-                  title={pw.name}
-                >
-                  <Icon className={compactLandscape ? "h-3 w-3 shrink-0" : "h-3.5 w-3.5"} style={{ color: pw.color }} />
-                  {!compactLandscape && (
-                    <span className="font-cond text-[10px] font-extrabold tracking-widest" style={{ color: pw.color }}>
-                      {pw.name}
-                      {pw.charges ? ` ×${pw.charges}` : ""}
-                    </span>
-                  )}
-                  {compactLandscape && typeof pw.charges === "number" && pw.charges > 0 && (
-                    <span className="font-num text-[8px] font-extrabold" style={{ color: pw.color }}>×{pw.charges}</span>
-                  )}
-                  <span className={"relative block overflow-hidden rounded-full bg-court-600 " + (compactLandscape ? "h-0.5 w-3" : "h-1 w-7")}>
-                    <span className="absolute inset-y-0 left-0 transition-[width] duration-75" style={{ width: `${Math.max(0, Math.min(1, pw.pct)) * 100}%`, background: pw.color }} />
-                  </span>
-                </div>
-              );
+          {hud.combo > 1 && <div className="flex items-center gap-2 rounded bg-court-900/70 px-2 py-1"><span className="font-display text-[10px] text-magenta-hot">×{hud.combo}</span><span className="h-1 w-12 overflow-hidden rounded bg-court-700"><span className="block h-full bg-magenta-hot" style={{ width: powerPct(hud.comboPct) }} /></span></div>}
+          {(hud.bossName || hud.portal) && <div className="flex flex-wrap gap-1" role="status">
+            {hud.bossName && <span className="flex items-center gap-1 rounded bg-court-900/80 px-2 py-1 font-cond text-[11px] font-extrabold text-magenta-hot"><Skull className="h-3.5 w-3.5" />{hud.bossName}</span>}
+            {hud.portal && <span className="flex items-center gap-1 rounded bg-court-900/80 px-2 py-1 font-cond text-[11px] font-extrabold text-lime-hot"><DoorOpen className="h-3.5 w-3.5" />PORTAIL OUVERT</span>}
+          </div>}
+          <div className="flex max-w-[55vw] flex-wrap gap-1">
+            {hud.weaponDrop && <div title="Arme temporaire" className="rounded bg-court-900/80 px-2 py-1"><span className="font-cond text-[10px] font-extrabold text-gold">{hud.weaponName}</span><span className="mt-1 block h-0.5 w-full bg-line"><span className="block h-full bg-gold" style={{ width: powerPct(hud.weaponDropPct) }} /></span></div>}
+            {hud.powers.slice(0, 6).map(power => {
+              const Icon = POWER_ICONS[power.id] ?? Zap;
+              return <div key={power.id} title={power.name} aria-label={`${power.name}${power.charges ? ` ×${power.charges}` : ''}`} className="rounded bg-court-900/80 px-1.5 py-1" style={{ color: power.color }}><span className="flex items-center gap-1"><Icon className="h-3.5 w-3.5" />{power.charges ? <span className="font-num text-[10px]">×{power.charges}</span> : null}</span><span className="mt-1 block h-0.5 w-5 bg-line"><span className="block h-full" style={{ width: powerPct(power.pct), background: power.color }} /></span></div>;
             })}
           </div>
         </div>
-
-        {/* score + boutons système */}
-        <div className={"flex flex-col items-end " + (compactLandscape ? "gap-0.5" : "gap-1.5") + (isTouch ? " max-w-[62vw]" : "")}>
-          <div className={"text-right " + (portrait ? "max-w-[46vw]" : "")}>
-            <div className={"font-cond font-extrabold tracking-[0.2em] text-moss " + (compactLandscape ? "text-[8px]" : "text-[10px] tracking-[0.28em]")}>SCORE</div>
-            <div
-              className={
-                "font-display leading-none text-chalk tabular-nums " +
-                (compactLandscape ? "text-[18px] " : isTouch ? "text-[22px] " : "text-2xl sm:text-4xl ")
-              }
-              style={{ textShadow: "0 3px 0 rgba(5,16,13,0.9), 0 0 24px rgba(62,232,255,0.35)" }}
-            >
-              {hud.score.toLocaleString()}
-            </div>
-            {hud.combo > 1 && (
-              <div className="mt-1 flex items-center justify-end gap-1.5">
-                <span className="slash bg-magenta-hot px-2 py-[2px] font-display text-[11px] text-court-900">
-                  COMBO x{hud.combo}
-                </span>
-                <span className={"relative block overflow-hidden rounded-full bg-court-700 " + (isTouch ? "h-1.5 w-10" : "h-1.5 w-12 sm:w-16")}>
-                  <span
-                    className="absolute inset-y-0 left-0 bg-magenta-hot transition-[width] duration-75"
-                    style={{ width: `${hud.comboPct * 100}%` }}
-                  />
-                </span>
-              </div>
-            )}
-          </div>
-          <div className={"pointer-events-auto flex flex-wrap justify-end " + (compactLandscape ? "gap-1" : "gap-1.5")}>
-            <button
-              onClick={onSave}
-              disabled={saveBusy}
-              title="Sauvegarder la partie (Ctrl+S)"
-              aria-label="Sauvegarder la partie"
-              className={tap + (compactLandscape ? " compact-touch-button h-9 w-9" : isTouch ? " h-10 w-10" : " h-9 gap-1 px-2") + (justSaved ? " border-lime-hot/80" : "")}
-            >
-              {saveBusy ? (
-                <Loader2 className={isTouch ? "h-4 w-4 animate-spin text-cyan-hot" : "h-4 w-4 animate-spin text-cyan-hot"} />
-              ) : justSaved ? (
-                <Check className="h-4 w-4 text-lime-hot" />
-              ) : (
-                <Save className="h-4 w-4 text-gold" />
-              )}
-              {!isTouch && <span className="font-cond text-[10px] font-extrabold tracking-[0.16em] text-chalk/85">{justSaved ? "OK" : "SAUVER"}</span>}
-            </button>
-            <button onClick={onPause} aria-label="Pause" className={tap + (compactLandscape ? " compact-touch-button h-9 w-9" : isTouch ? " h-10 w-10" : " h-9 w-9")}>
-              <Pause className={isTouch ? "h-4 w-4 text-chalk" : "h-4 w-4 text-chalk/80"} />
-            </button>
-            <button onClick={onMute} aria-label="Son" className={tap + (isTouch ? " h-9 w-9" : " h-9 w-9")}>
-              {muted ? (
-                <VolumeX className={isTouch ? "h-4 w-4 text-magenta-hot" : "h-4 w-4 text-chalk/80"} />
-              ) : (
-                <Volume2 className={isTouch ? "h-4 w-4 text-cyan-hot" : "h-4 w-4 text-chalk/80"} />
-              )}
-            </button>
-            {isTouch && (
-              <button onClick={onVibe} aria-label="Vibration" className={tap + (compactLandscape ? " compact-touch-button h-9 w-9" : isTouch ? " h-10 w-10" : " h-9 w-9")}>
-                <Vibrate className={"h-4 w-4 " + (vibe ? "text-lime-hot" : "text-moss")} />
-              </button>
-            )}
-            {isTouch && !portrait && (
-              <button onClick={onFullscreen} aria-label="Plein écran" className={tap + (compactLandscape ? " compact-touch-button h-9 w-9" : isTouch ? " h-10 w-10" : " h-9 w-9")}>
-                <Maximize className="h-4 w-4 text-gold" />
-              </button>
-            )}
-          </div>
+        <div className="pointer-events-auto flex shrink-0 gap-1.5">
+          <button ref={detailsButton} onClick={() => setDetails(value => !value)} aria-label={details ? 'Masquer les détails' : 'Afficher les détails'} aria-expanded={details} aria-controls="hud-details" title="Détails de la partie (H)" className={tap + ' hud-action h-11 w-11 rounded-lg bg-court-900/75'}>{details ? <X className="h-4 w-4 text-cyan-hot" /> : <MoreHorizontal className="h-5 w-5 text-chalk" />}</button>
+          <button onClick={onPause} aria-label="Pause" title="Pause (P / Échap)" className={tap + ' hud-action h-11 w-11 rounded-lg bg-court-900/75'}><Pause className="h-4 w-4 text-chalk" /></button>
         </div>
       </div>
-
-      {/* ---------- barre basse : uniquement au clavier (les pouces en ont besoin) ---------- */}
-      {!isTouch && (
-        <div className="pad-hud-b pad-hud-l pad-hud-r absolute inset-x-0 bottom-0 flex items-end justify-between gap-3">
-          <div className="flex items-center gap-1.5 opacity-75">
-            {[
-              ["WASD", "BOUGER"],
-              ["SOURIS", "VISER"],
-              ["CLIC / ESPACE", "TIRER"],
-              ["MAJ", "DASH"],
-              ["R", "CHARGER"],
-              ["P", "PAUSE"],
-            ].map(([k, v]) => (
-              <span key={k} className="flex items-center gap-1">
-                <kbd className="panel px-1.5 py-0.5 font-cond text-[10px] font-extrabold tracking-wider text-cyan-hot">{k}</kbd>
-                <span className="font-cond text-[10px] font-extrabold tracking-[0.16em] text-moss">{v}</span>
-              </span>
-            ))}
-          </div>
-          <span className="flex items-center gap-1 font-cond text-[10px] font-extrabold tracking-[0.18em] text-moss">
-            {hud.portal ? (
-              <>
-                <DoorOpen className="h-3.5 w-3.5 text-lime-hot" /> PORTAIL OUVERT — FRANCHIS-LE POUR LE NIVEAU SUIVANT
-              </>
-            ) : (
-              <>
-                <Smartphone className="h-3 w-3" /> NOUVEAU TERRAIN TOUS LES 4 NIVEAUX
-              </>
-            )}
-          </span>
+      {details && <section id="hud-details" aria-label="Détails de la partie" className={'hud-details pointer-events-auto absolute right-[max(0.75rem,env(safe-area-inset-right))] top-[calc(4rem+env(safe-area-inset-top))] z-10 max-h-[min(60dvh,26rem)] w-[min(20rem,calc(100%-1.5rem))] overflow-y-auto rounded-xl border border-line bg-court-900/95 p-4 shadow-xl ' + (isTouch && !portrait ? 'text-xs' : '')}
+        onKeyDown={event => { event.stopPropagation(); if (event.key === 'Escape') { event.preventDefault(); setDetails(false); detailsButton.current?.focus(); } }}>
+        <h2 className="mb-3 font-display text-xs text-chalk">DÉTAILS DE LA PARTIE</h2>
+        <dl className="grid grid-cols-2 gap-x-4 gap-y-2 font-cond text-sm text-moss">
+          <dt>Score</dt><dd className="text-right font-num font-bold text-chalk">{hud.score.toLocaleString('fr-FR')}</dd>
+          <dt>Terrain peint</dt><dd className="text-right text-cyan-hot">{Math.round(hud.coverage * 100)} %</dd>
+          <dt>Marqueur</dt><dd className="text-right text-chalk">{hud.weaponName}</dd>
+          <dt>Arène {hud.arenaIndex + 1}/{hud.arenaCount}</dt><dd className="text-right text-chalk">{hud.arena}</dd>
+          <dt className="flex items-center gap-1"><Timer className="h-3 w-3" />Temps</dt><dd className="text-right font-num text-chalk">{Math.floor(hud.time / 60)}:{String(Math.floor(hud.time % 60)).padStart(2, '0')}</dd>
+        </dl>
+        <div className="mt-4 flex flex-wrap gap-2 border-t border-line pt-3">
+          <button onClick={onSave} disabled={saveBusy} aria-label="Sauvegarder la partie" className={tap + ' hud-action min-h-11 gap-2 px-3 text-xs text-chalk'}>{saveBusy ? <Loader2 className="h-4 w-4 animate-spin" /> : justSaved ? <Check className="h-4 w-4 text-lime-hot" /> : <Save className="h-4 w-4 text-gold" />}{saveBusy ? 'Sauvegarde…' : justSaved ? 'Sauvegardé' : 'Sauver'}</button>
+          <button onClick={onMute} aria-label={muted ? 'Activer le son' : 'Couper le son'} className={tap + ' hud-action h-11 w-11'}>{muted ? <VolumeX className="h-4 w-4 text-moss" /> : <Volume2 className="h-4 w-4 text-cyan-hot" />}</button>
+          {isTouch && <><button onClick={onVibe} aria-label="Vibrations" aria-pressed={vibe} className={tap + ' hud-action h-11 w-11'}><Vibrate className={'h-4 w-4 ' + (vibe ? 'text-lime-hot' : 'text-moss')} /></button><button onClick={onFullscreen} aria-label="Plein écran" className={tap + ' hud-action h-11 w-11'}><Maximize className="h-4 w-4 text-gold" /></button></>}
         </div>
-      )}
+        <p className="mt-3 font-cond text-xs text-moss">La partie continue. Mets en pause pour consulter tranquillement les options.</p>
+      </section>}
     </div>
   );
 }
