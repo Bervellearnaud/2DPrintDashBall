@@ -564,10 +564,10 @@ function MainMenu(props: StartProps) {
     const { title, description, icon: Icon } = MENU_SECTIONS[id];
     return (
       <button key={id} onClick={() => open(id)} aria-haspopup="dialog"
-        className="menu-option panel flex min-h-20 items-center gap-3 p-4 text-left transition hover:border-cyan-hot hover:bg-court-600">
-        <Icon className="h-5 w-5 shrink-0 text-cyan-hot" />
-        <span className="min-w-0 flex-1"><span className="block font-display text-sm text-chalk">{title}</span>
-          <span className="mt-1 block font-cond text-xs text-moss">{description}</span></span>
+        className="menu-option panel flex min-h-14 items-center gap-2 p-3 text-left transition hover:border-cyan-hot hover:bg-court-600">
+        <Icon className="h-4 w-4 shrink-0 text-cyan-hot" />
+        <span className="min-w-0 flex-1"><span className="block font-display text-xs text-chalk">{title}</span>
+          <span className="mt-0.5 block font-cond text-[11px] leading-tight text-moss">{description}</span></span>
         <ChevronRight className="h-4 w-4 shrink-0 text-moss" />
       </button>
     );
@@ -595,13 +595,13 @@ function MainMenu(props: StartProps) {
               {props.best > 0 && <div><span className="block font-cond text-[10px] font-bold tracking-widest text-moss">MEILLEUR SCORE</span><span className="mt-3 block font-display text-sm text-gold">{props.best.toLocaleString("fr-FR")}</span></div>}
             </div>
           </header>
-          <nav aria-label="Menu principal" className="anim-in flex min-w-0 flex-col gap-3">
-            <button onClick={() => open("play")} aria-haspopup="dialog" className="btn flex min-h-20 items-center gap-4 bg-cyan-hot px-5 py-4 text-left text-court-900">
-              <Play className="h-7 w-7 fill-current" /><span className="flex-1"><span className="block text-xl">JOUER</span><span className="mt-1 block font-cond text-xs font-bold tracking-widest">{props.saveMeta ? "NOUVELLE PARTIE OU REPRENDRE" : "SURVIE SOLO"}</span></span><ChevronRight className="h-5 w-5" />
+          <nav aria-label="Menu principal" className="anim-in flex w-full min-w-0 max-w-md flex-col gap-2 lg:justify-self-end">
+            <button onClick={() => open("play")} aria-haspopup="dialog" className="btn flex min-h-16 items-center gap-3 bg-cyan-hot px-4 py-3 text-left text-court-900">
+              <Play className="h-5 w-5 fill-current" /><span className="flex-1"><span className="block text-base">JOUER</span><span className="mt-0.5 block font-cond text-[10px] font-bold tracking-wider">{props.saveMeta ? "NOUVELLE PARTIE OU REPRENDRE" : "SURVIE SOLO"}</span></span><ChevronRight className="h-5 w-5" />
             </button>
-            <div className="grid gap-3 sm:grid-cols-2">
+            <div className="grid gap-2 sm:grid-cols-2">
               {navigation("arsenal")}
-              {props.onProgression && <button onClick={props.onProgression} className="menu-option panel flex min-h-20 items-center gap-3 p-4 text-left transition hover:border-cyan-hot hover:bg-court-600"><Cloud className="h-5 w-5 shrink-0 text-lime-hot" /><span><span className="block font-display text-sm text-chalk">PROGRESSION</span><span className="mt-1 block font-cond text-xs text-moss">Profil, statistiques et déblocages.</span></span></button>}
+              {props.onProgression && <button onClick={props.onProgression} className="menu-option panel flex min-h-14 items-center gap-2 p-3 text-left transition hover:border-cyan-hot hover:bg-court-600"><Cloud className="h-4 w-4 shrink-0 text-lime-hot" /><span><span className="block font-display text-xs text-chalk">PROGRESSION</span><span className="mt-0.5 block font-cond text-[11px] leading-tight text-moss">Profil, statistiques et déblocages.</span></span></button>}
               {navigation("records")}
               {navigation("settings")}
             </div>
