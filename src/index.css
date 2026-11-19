@@ -347,3 +347,63 @@ input {
 @media (max-width: 480px) {
   .hud-essential { max-width: 210px; column-gap: 0.5rem; }
 }
+
+/* Keep the last menu action reachable above mobile browser/system bars. */
+.menu-home {
+  padding-bottom: max(2rem, calc(env(safe-area-inset-bottom, 0px) + 1.5rem));
+}
+.menu-home > header,
+.menu-home > nav {
+  flex-shrink: 0;
+}
+@media (max-width: 639px) {
+  .menu-home {
+    justify-content: flex-start;
+    gap: 1.25rem;
+    padding-top: max(1rem, env(safe-area-inset-top, 0px));
+    padding-left: max(1rem, env(safe-area-inset-left, 0px));
+    padding-right: max(1rem, env(safe-area-inset-right, 0px));
+  }
+  .menu-intro > div:first-child { margin-bottom: 1rem; }
+  .menu-tagline { margin-top: 1rem; font-size: 0.875rem; line-height: 1.4; }
+  .menu-summary { margin-top: 1rem; }
+  .menu-options-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .menu-options-grid .menu-option { padding: 0.625rem; }
+  .menu-options-grid .menu-option .font-display { font-size: 0.625rem; }
+  .menu-options-grid .menu-option .font-cond { display: none; }
+  .menu-options-grid .menu-option > svg:last-child:not(:first-child) { display: none; }
+  .menu-navigation { max-width: none; }
+}
+/* Short landscape phones: put branding beside actions instead of above them. */
+@media (min-width: 640px) and (max-height: 500px) {
+  .menu-home {
+    display: grid;
+    grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
+    align-items: start;
+    gap: 1.5rem;
+    padding-top: max(1rem, env(safe-area-inset-top, 0px));
+  }
+  .menu-home h1 { font-size: clamp(1.5rem, 4.5vw, 2.5rem); }
+  .menu-intro > div:first-child { margin-bottom: 1rem; }
+  .menu-tagline, .menu-summary { margin-top: 1rem; }
+  .menu-tagline { font-size: 0.875rem; }
+  .menu-navigation { max-width: none; }
+}
+
+/* Compact results window; long details scroll inside rather than filling the screen. */
+.gameover-overlay {
+  padding-top: max(0.75rem, env(safe-area-inset-top, 0px));
+  padding-bottom: max(0.75rem, env(safe-area-inset-bottom, 0px));
+  padding-left: max(0.75rem, env(safe-area-inset-left, 0px));
+  padding-right: max(0.75rem, env(safe-area-inset-right, 0px));
+}
+.gameover-window {
+  max-height: min(85dvh, calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 1.5rem));
+}
+.gameover-summary { min-height: 44px; }
+.gameover-window button { min-height: 44px; }
+.gameover-summary:focus-visible,
+.gameover-window button:focus-visible {
+  outline: 2px solid var(--color-cyan-hot);
+  outline-offset: 2px;
+}
