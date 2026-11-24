@@ -577,7 +577,7 @@ function MainMenu(props: StartProps) {
       <div inert={section !== null}>
         <div className="stripes h-2 opacity-70" />
         <main className="menu-home mx-auto flex min-h-[calc(100dvh-8px)] max-w-6xl flex-col justify-center gap-8 px-5 py-8 sm:px-8 lg:grid lg:grid-cols-[1.1fr_0.9fr] lg:items-center lg:gap-12">
-          <header className="anim-in min-w-0">
+          <header className="menu-intro anim-in min-w-0">
             <div className="mb-6 flex flex-wrap items-center gap-3">
               <span className="slash bg-magenta-hot px-3 py-1 font-display text-[10px] text-court-900">ARCADE ARENA</span>
               <span className="font-cond text-[10px] font-extrabold tracking-[0.22em] text-moss">SURVIE · PEINTURE · COMBOS</span>
@@ -586,8 +586,8 @@ function MainMenu(props: StartProps) {
               <Splat className="pointer-events-none absolute -left-4 -top-8 -z-10 h-32 w-32 opacity-45" color="#3ee8ff" />
               <Logo small={props.isTouch} />
             </div>
-            <p className="mt-6 max-w-sm font-body text-base leading-relaxed text-chalk/75">Vise juste. Peins le court. Survis aux vagues.<br />L’arène attend ta prochaine couleur.</p>
-            <div className="mt-6 flex flex-wrap gap-5 border-l-2 border-cyan-hot pl-4">
+            <p className="menu-tagline mt-6 max-w-sm font-body text-base leading-relaxed text-chalk/75">Vise juste. Peins le court. Survis aux vagues.<br />L’arène attend ta prochaine couleur.</p>
+            <div className="menu-summary mt-6 flex flex-wrap gap-5 border-l-2 border-cyan-hot pl-4">
               <div><span className="block font-cond text-[10px] font-bold tracking-widest text-moss">MARQUEUR ÉQUIPÉ</span>
                 <button onClick={() => open("arsenal")} className="mt-1 flex min-h-11 items-center gap-2 font-display text-sm text-cyan-hot" aria-label={`Changer de marqueur : ${selected.name}`}>
                   <Crosshair className="h-4 w-4" />{selected.name}<ChevronRight className="h-4 w-4" />
@@ -595,11 +595,11 @@ function MainMenu(props: StartProps) {
               {props.best > 0 && <div><span className="block font-cond text-[10px] font-bold tracking-widest text-moss">MEILLEUR SCORE</span><span className="mt-3 block font-display text-sm text-gold">{props.best.toLocaleString("fr-FR")}</span></div>}
             </div>
           </header>
-          <nav aria-label="Menu principal" className="anim-in flex w-full min-w-0 max-w-md flex-col gap-2 lg:justify-self-end">
+          <nav aria-label="Menu principal" className="menu-navigation anim-in flex w-full min-w-0 max-w-md flex-col gap-2 lg:justify-self-end">
             <button onClick={() => open("play")} aria-haspopup="dialog" className="btn flex min-h-16 items-center gap-3 bg-cyan-hot px-4 py-3 text-left text-court-900">
               <Play className="h-5 w-5 fill-current" /><span className="flex-1"><span className="block text-base">JOUER</span><span className="mt-0.5 block font-cond text-[10px] font-bold tracking-wider">{props.saveMeta ? "NOUVELLE PARTIE OU REPRENDRE" : "SURVIE SOLO"}</span></span><ChevronRight className="h-5 w-5" />
             </button>
-            <div className="grid gap-2 sm:grid-cols-2">
+            <div className="menu-options-grid grid gap-2 sm:grid-cols-2">
               {navigation("arsenal")}
               {props.onProgression && <button onClick={props.onProgression} className="menu-option panel flex min-h-14 items-center gap-2 p-3 text-left transition hover:border-cyan-hot hover:bg-court-600"><Cloud className="h-4 w-4 shrink-0 text-lime-hot" /><span><span className="block font-display text-xs text-chalk">PROGRESSION</span><span className="mt-0.5 block font-cond text-[11px] leading-tight text-moss">Profil, statistiques et déblocages.</span></span></button>}
               {navigation("records")}
@@ -806,10 +806,6 @@ export function GameOverScreen({
   const isRecord = rows.length === 0 || result.score >= rows[0].score;
 
   useEffect(() => {
-    if (!isTouch) inputRef.current?.focus();
-  }, [isTouch]);
-
-  useEffect(() => {
     if (playerName) setName(cleanName(playerName));
   }, [playerName]);
 
@@ -822,22 +818,22 @@ export function GameOverScreen({
   };
 
   return (
-    <div className="scroll-thin absolute inset-0 overflow-y-auto bg-court-900/78 backdrop-blur-[2px]">
-      <div className="pad-menu-t pad-menu-b mx-auto grid min-h-full max-w-5xl items-center gap-5 p-4 sm:p-6 lg:grid-cols-[1.05fr_0.95fr]">
-        <div className="panel anim-pop relative overflow-hidden">
+    <div className="gameover-overlay absolute inset-0 flex items-center justify-center bg-court-900/78 p-3 backdrop-blur-[2px]">
+      <div className="gameover-window scroll-thin w-full max-w-lg overflow-y-auto rounded-xl border border-line bg-court-900 shadow-2xl" role="region" aria-labelledby="gameover-title">
+        <div className="anim-pop relative overflow-hidden">
           <div className="stripes h-1.5 w-full" />
           <Splat className="pointer-events-none absolute -right-10 -top-8 h-40 w-40 opacity-25" color="#ff2f87" />
-          <div className="relative p-5">
-            <div className="flex items-center gap-2">
+          <div className="relative p-4">
+            <div className="flex flex-wrap items-center gap-2">
               <Skull className="h-5 w-5 text-magenta-hot" />
-              <h2 className="font-display text-2xl leading-none text-magenta-hot sm:text-3xl">TU ES SPLATTÉ</h2>
+              <h2 id="gameover-title" className="font-display text-lg leading-none text-magenta-hot sm:text-xl">TU ES SPLATTÉ</h2>
               {isRecord && <span className="slash anim-blink bg-gold px-2 py-[2px] font-display text-[10px] text-court-900">NOUVEAU RECORD</span>}
             </div>
             <div className="mt-3 flex items-end gap-3">
               <div>
                 <div className="font-cond text-[10px] font-extrabold tracking-[0.28em] text-moss">SCORE FINAL</div>
                 <div
-                  className="font-display text-5xl leading-none text-chalk sm:text-6xl"
+                  className="font-display text-4xl leading-none text-chalk sm:text-5xl"
                   style={{ textShadow: "0 4px 0 #05100d, 0 0 34px rgba(62,232,255,0.4)" }}
                 >
                   {result.score.toLocaleString()}
@@ -845,7 +841,7 @@ export function GameOverScreen({
               </div>
             </div>
             {onProgression && (
-              <button onClick={onProgression} className="panel mt-3 flex w-full items-center gap-2 px-3 py-2 text-left transition hover:border-cyan-hot active:translate-y-0.5">
+              <button onClick={onProgression} className="panel mt-3 flex min-h-11 w-full items-center gap-2 px-3 py-2 text-left transition hover:border-cyan-hot active:translate-y-0.5">
                 {cloudStatus === "guest" || cloudStatus === "account" ? (
                   <Cloud className="h-4 w-4 shrink-0 text-lime-hot" />
                 ) : (
@@ -853,33 +849,38 @@ export function GameOverScreen({
                 )}
                 <span className="font-cond text-[11px] font-extrabold tracking-[0.16em] text-chalk">
                   {cloudStatus === "guest" || cloudStatus === "account"
-                    ? "PARTIE ENVOYÉE AU CLOUD · VOIR MA PROGRESSION"
-                    : "SAUVEGARDE LOCALE · ACTIVER LE CLOUD"}
+                    ? "VOIR MA PROGRESSION · CLOUD"
+                    : "PROGRESSION · SAUVEGARDE LOCALE"}
                 </span>
               </button>
             )}
-            <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
+            <div className="mt-3 grid grid-cols-3 gap-2">
               <Stat label="VAGUE" value={String(result.wave)} />
               <Stat label="SPLATS" value={String(result.kills)} />
               <Stat label="SÉRIE" value={String(result.maxCombo)} sub="meilleure chaîne" />
+            </div>
+            <details className="mt-3 border-t border-line pt-2">
+              <summary className="gameover-summary cursor-pointer py-2 font-cond text-xs font-extrabold tracking-wide text-moss">STATISTIQUES DÉTAILLÉES</summary>
+              <div className="mt-2 grid grid-cols-3 gap-2">
               <Stat label="PRÉCISION" value={acc + "%"} sub={`${result.hits}/${result.shots}`} />
               <Stat label="PEINTURE" value={Math.round(result.coverage * 100) + "%"} />
               <Stat label="TEMPS" value={fmtTime(result.time)} />
-            </div>
+              </div>
+            </details>
 
-            <div className={"mt-5 flex flex-wrap items-center gap-2 " + (isTouch ? "flex-nowrap" : "")}>
+            <div className={"mt-3 flex flex-wrap items-center gap-2 " + (isTouch ? "flex-nowrap" : "")}>
               {isTouch ? (
                 <>
                   <button
                     onClick={onRestart}
-                    className="btn flex flex-1 items-center justify-center gap-2 bg-cyan-hot py-4 text-base text-court-900"
+                    className="btn flex flex-1 items-center justify-center gap-2 bg-cyan-hot py-2.5 text-sm text-court-900"
                   >
                     <RotateCcw className="h-5 w-5" /> REJOUER
                   </button>
                   <button
                     onClick={onMenu}
                     aria-label="Menu"
-                    className="btn flex items-center justify-center bg-court-600 px-4 py-4 text-sm text-chalk"
+                    className="btn flex items-center justify-center bg-court-600 px-3 py-2.5 text-sm text-chalk"
                   >
                     <Home className="h-5 w-5" />
                   </button>
@@ -903,7 +904,9 @@ export function GameOverScreen({
           </div>
         </div>
 
-        <div className="anim-in flex flex-col gap-4" style={{ animationDelay: "0.06s" }}>
+        <details className="mx-4 mb-4 border-t border-line pt-2" onToggle={event => { if (event.currentTarget.open && !isTouch) inputRef.current?.focus(); }}>
+          <summary className="gameover-summary cursor-pointer py-2 font-cond text-xs font-extrabold tracking-wide text-cyan-hot">ENREGISTRER MON SCORE ET VOIR LE CLASSEMENT</summary>
+          <div className="mt-2 flex flex-col gap-3">
           <div className="panel p-4">
             <h3 className="font-display text-[13px] tracking-wide text-chalk">ENREGISTRER TA PARTIE</h3>
             <p className="mt-1 font-cond text-[11px] font-bold leading-snug tracking-wide text-moss">
@@ -952,7 +955,8 @@ export function GameOverScreen({
             )}
           </div>
           <Leaderboard rows={rows} highlight={savedRank !== null && savedRank >= 0 ? savedRank : undefined} />
-        </div>
+          </div>
+        </details>
       </div>
     </div>
   );

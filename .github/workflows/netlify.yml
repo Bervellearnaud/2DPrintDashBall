@@ -29,11 +29,18 @@ jobs:
       - name: Installation
         run: npm ci
 
-      - name: Vérification des types
-        run: npx tsc --noEmit
+      - name: Vérification des types (front et serveur)
+        run: npm run typecheck
+
+      - name: Tests des règles
+        run: npm run test:rules
 
       - name: Build
         run: npm run build
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+          VITE_MULTIPLAYER_URL: ${{ secrets.VITE_MULTIPLAYER_URL }}
 
       # artefact de secours : le dist/ complet, téléchargeable depuis l'onglet Actions
       - name: Archive du build
