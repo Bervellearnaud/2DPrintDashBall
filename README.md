@@ -4,10 +4,35 @@
 Tu tiens un marqueur, tu tiens un court, tu tiens une vague. Chaque bille manquée tache le terrain — et le terrain rapporte des points.
 
 [![En ligne](https://img.shields.io/badge/play-painballvoom.netlify.app-3ee8ff)](https://painballvoom.netlify.app)
-[![Dépôt](https://img.shields.io/badge/source-GitHub-e9f5ee)](https://github.com/loba225samuel-coder/painballv2)
+[![Dépôt](https://img.shields.io/badge/source-GitHub-e9f5ee)](https://github.com/Bervellearnaud/2DPrintDashBall)
 
 **En ligne :** <https://painballvoom.netlify.app>  
-**Dépôt :** <https://github.com/loba225samuel-coder/painballv2>
+**Dépôt :** <https://github.com/Bervellearnaud/2DPrintDashBall>
+
+## État actuel et installation
+
+- **Accueil compact** : Jouer, Arsenal, Progression, Records, Paramètres et Commandes. Les options sont sur deux colonnes sur petit écran, avec des marges adaptées aux zones système.
+- **HUD discret** : vie, vague, ennemis et munitions ; bouton **…** ou touche **H** pour les détails (score, peinture, arène, chrono, sauvegarde). Ouvrir les détails ne met pas la partie en pause.
+- **Fin de partie compacte** : score et actions principales visibles, statistiques détaillées et enregistrement/classement dépliables.
+- **Boss redessinés** : les illustrations du bestiaire sont exportées depuis le moteur. Les captures et mockups plus bas peuvent représenter une interface antérieure.
+- **Multijoueur conservé dans le code, masqué dans le menu** tant que `MULTIPLAYER_ENABLED` vaut `false`.
+
+### Installation en bref
+
+Prérequis : **Node.js 22** (voir `.nvmrc`), npm et Git.
+
+```bash
+git clone https://github.com/Bervellearnaud/2DPrintDashBall.git
+cd 2DPrintDashBall
+npm ci
+cp .env.example .env.local
+# Configurer les deux variables Supabase avec votre propre projet.
+npm run dev
+```
+
+**Créer la base cloud :** suivre le [guide Supabase complet](supabase/README.md) ou la [procédure résumée](#74-créer-et-configurer-la-base-supabase). Il couvre la création du projet, les trois migrations SQL, l’authentification et les tests.
+
+> Les variables front sont publiques. Ne placez jamais de clé `service_role`, de clé secrète ou de mot de passe SQL dans `VITE_*`. Le client contient un repli vers un projet de démonstration : configurez **URL et clé publique** pour utiliser votre propre base.
 
 ## Aperçu du jeu
 
@@ -449,7 +474,7 @@ Authentification Supabase :
 
 En solo :
 
-- bouton **SAUVER** dans le HUD ;
+- bouton **… → Sauver** dans le volet de détails du HUD ;
 - raccourci **Ctrl+S** ;
 - **SAUVEGARDER ET QUITTER** dans la pause ;
 - carte **PARTIE EN COURS** à l’accueil et dans le vestiaire.
@@ -614,7 +639,9 @@ Choix principaux :
 ### Installer et lancer le front
 
 ```bash
-npm install
+npm ci
+cp .env.example .env.local
+# Remplacer les variables Supabase par celles de votre projet.
 npm run dev
 ```
 
@@ -622,7 +649,7 @@ Ouvre l’URL affichée par Vite, généralement <http://localhost:5173>.
 
 ### Lancer le serveur de salons (multijoueur — UI désactivée pour le moment)
 
-Le code est prêt et testé, mais le bouton **MULTIJOUEUR** est grisé (`MULTIPLAYER_ENABLED = false` dans `src/App.tsx`).
+Le code multijoueur est conservé, mais le bouton **MULTIJOUEUR** est masqué (`MULTIPLAYER_ENABLED = false` dans `src/App.tsx`).
 
 Terminal 1 :
 
@@ -646,7 +673,7 @@ npm run preview
 ```
 
 Le build produit `dist/index.html` autonome (JS + CSS inlinés) plus `manifest.json` et l’icône.
-Taille actuelle : **~614 Ko, ~175 Ko gzip**.
+La taille exacte est affichée par Vite à chaque build et dépend des changements du projet.
 
 ---
 
@@ -654,6 +681,9 @@ Taille actuelle : **~614 Ko, ~175 Ko gzip**.
 
 | Commande | Rôle |
 | --- | --- |
+| `npm run check` | types front/serveur, tests de règles et build |
+| `npm run typecheck` | vérification TypeScript front et serveur |
+| `npm run test:rules` | bonus, équilibrage des marqueurs et fréquence des capsules |
 | `npm run dev` | front en développement avec HMR |
 | `npm run build` | build de production dans `dist/` |
 | `npm run preview` | sert le build localement |
@@ -749,18 +779,23 @@ Ensuite, mettre l’URL publique dans `VITE_MULTIPLAYER_URL` côté Netlify, en 
 
 Le serveur peut aussi tourner sur Fly.io, un VPS, ou n’importe quel hébergeur Node capable de garder des WebSockets ouverts.
 
-### 7.4 Supabase
+### 7.4 Créer et configurer la base Supabase
 
-1. Ouvrir **SQL Editor**.
-2. Exécuter :
-   - `supabase/migrations/202610280001_progression.sql`
-   - `supabase/migrations/202610280002_saved_runs.sql`
-   - `supabase/migrations/202610280003_profile_names.sql`
-3. Activer **Anonymous Sign-Ins** dans Authentication.
-4. Configurer `Site URL` et les Redirect URLs.
-5. Ajouter les variables Supabase dans Netlify.
+1. Dans Supabase, créer un **nouveau projet**, choisir une région et conserver le mot de passe SQL hors du dépôt.
+2. Dans **SQL Editor**, copier et exécuter intégralement ces fichiers **dans l’ordre** :
+   1. [`202610280001_progression.sql`](supabase/migrations/202610280001_progression.sql) — profils, statistiques, résultats, fonctions et RLS ;
+   2. [`202610280002_saved_runs.sql`](supabase/migrations/202610280002_saved_runs.sql) — sauvegardes en cours et RLS ;
+   3. [`202610280003_profile_names.sql`](supabase/migrations/202610280003_profile_names.sql) — gestion des pseudos.
+3. Dans **Authentication**, activer **Anonymous Sign-Ins** et, si souhaité, le fournisseur **Email** pour les liens magiques.
+4. Définir la **Site URL** de production et les redirections autorisées (`http://localhost:5173/**` en développement, votre domaine en production).
+5. Copier `.env.example` vers `.env.local`, puis définir `VITE_SUPABASE_URL` et `VITE_SUPABASE_ANON_KEY` avec l’URL et la clé **publique publishable** du nouveau projet. Redémarrer Vite.
+6. Exécuter [`supabase/verify.sql`](supabase/verify.sql) dans SQL Editor : les contrôles doivent afficher `ok = true` et le grade initial `RECRUE`. Un classement vide est normal.
+7. Tester **Progression → Continuer en invité**, une partie terminée, puis **… → Sauver** et **Jouer → Reprendre**. Vérifier l’isolation avec deux sessions distinctes.
+8. Sur Netlify, configurer les mêmes variables et reconstruire le site. Si le build est exécuté par GitHub Actions, configurer aussi les secrets de build correspondants dans GitHub.
 
-Guide détaillé : [`supabase/README.md`](./supabase/README.md).
+La base contient **quatre tables** : `profiles`, `player_stats`, `runs`, `saved_runs`. Les migrations créent aussi le trigger de profil et les fonctions `record_run`, `set_profile_name`, `leaderboard`, `player_grade`. **Ne pas désactiver la RLS** et ne pas écrire manuellement des identifiants dans les tables.
+
+Guide détaillé, alternative CLI, sécurité, sauvegardes et dépannage : **[supabase/README.md](supabase/README.md)**. Les vérifications SQL n’ont pas été exécutées sur votre projet distant par l’agent ; elles sont à lancer après installation.
 
 ---
 
@@ -820,7 +855,7 @@ render.yaml               blueprint serveur
 | Dash | Maj |
 | Recharger | R |
 | Pause | P ou Échap |
-| Sauvegarder | bouton SAUVER ou Ctrl+S |
+| Sauvegarder | **… → Sauver** ou Ctrl+S |
 | Musique | sélecteur sur l’accueil et dans la pause |
 | Son (SFX) | M |
 | Vibration | V |
@@ -933,5 +968,5 @@ Quelques suites naturelles :
 ## 13. Auteur
 
 Projet développé par **loba225samuel-coder**.  
-Dépôt : <https://github.com/loba225samuel-coder/painballv2>  
+Dépôt : <https://github.com/Bervellearnaud/2DPrintDashBall>
 Jeu en ligne : <https://painballvoom.netlify.app>
